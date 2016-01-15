@@ -1,6 +1,10 @@
 SHELL = /bin/sh
 PORT = 8090
 REPO = https://github.com/digitalamati/AmatiML
+NODE = nodejs
+
+setup:
+	apt-get install git nodejs racket
 
 install:
 	git clone $(REPO)
@@ -11,4 +15,4 @@ update:
 	cd AmatiML && raco pkg update
 
 run: 
-	node server.js $(PORT)
+	nodejs server.js $(PORT)
