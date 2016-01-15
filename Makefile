@@ -1,5 +1,5 @@
 SHELL = /bin/sh
-PORT = 8090
+PORT = 80
 REPO = https://github.com/digitalamati/AmatiML
 NODE = nodejs
 
