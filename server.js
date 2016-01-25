@@ -7,33 +7,35 @@ const PORT=process.argv[2];
 
 //We need a function which handles requests and send response
 function handleRequest(request, response){
-    request.on('data',function(data){
-        var svg_buf = new Buffer(200*1024);
+    var child = spawn('racket/bin/racket');
+        var svg = "";
         var err = "";
-        var offset = 0;
-
-        var child = spawn('racket');
-        child.stdin.write(data);
+	request.on('end',function(){
         child.stdin.end();
+});
+    request.on('data',function(data){
+
+        child.stdin.write(data);
 
         child.on('error',function(msg){
             err += msg.toString('utf-8');
         });
 
         child.stdout.on('data',function(data){
-            data.copy(svg_buf,offset);
-            offset+=data.length;
+	    svg += data.toString('utf-8');
         });
 
-        child.stderr.on('data',function(data){
-            err += data.toString('utf-8');
+        child.stderr.on('data',function(msg){
+            err += msg.toString('utf-8');
+		console.log(msg.toString('utf-8'));
 
         });
 
         child.on('close', function(code) {
+		clearTimeout(to);
             body = JSON.stringify({
                 "errors":err,
-                "svg":svg_buf.toString('utf-8',0,offset)
+                "svg":svg
             });
             response.writeHead(200, 
                     {
@@ -45,11 +47,12 @@ function handleRequest(request, response){
 
         });
 
-        var to = setTimeout(function(){
-            console.log('Sending sigkill');
-            child.kill();
-        }, 3000);
 
+
+var to = setTimeout(function(){
+  console.log('Sending sigkill');
+  child.kill();
+}, 5000);
     });
 }
 
